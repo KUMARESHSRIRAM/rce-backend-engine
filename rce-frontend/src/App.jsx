@@ -31,7 +31,7 @@ function App() {
         setIsPolling(true);
 
         try {
-            const response = await axios.post('http://16.171.56.245:3000/api/submissions/run', {
+            const response = await axios.post('/api/submissions/run', {
                 code,
                 input
             });
@@ -49,7 +49,7 @@ function App() {
     const pollSubmission = (submissionId) => {
         const interval = setInterval(async () => {
             try {
-                const response = await axios.get(`http://16.171.56.245:3000/api/submissions/${submissionId}`);
+                const response = await axios.get(`/api/submissions/${submissionId}`);
                 const submission = response.data.data;
 
                 setStatus(submission.status);
