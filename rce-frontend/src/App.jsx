@@ -18,6 +18,8 @@ public class Main {
     }
 }`;
 
+const MAX_POLLS=50;
+
 function App() {
     const [code, setCode] = useState(DEFAULT_CODE);
     const [input, setInput] = useState('15 27');
@@ -47,22 +49,36 @@ function App() {
     };
 
     const pollSubmission = (submissionId) => {
+
+        let attempts=0;
+
         const interval = setInterval(async () => {
+            attempts++;
             try {
                 const response = await axios.get(`/api/submissions/${submissionId}`);
                 const submission = response.data.data;
 
                 setStatus(submission.status);
 
-                if (submission.status === 'Accepted' || submission.status.includes('Error') || submission.status === 'Time Limit Exceeded') {
+                const stillWaiting= submission.status === 'Pending' || submission.status === 'Running';
+
+                if (!stillWaiting) {
                     clearInterval(interval);
                     setIsPolling(false);
                     setOutput(submission.output || submission.errorMessage || 'No output.');
+                }
+                else if(attempts >= MAX_POLLS) {
+                    clearInterval(interval);
+                    setIsPolling(false);
+                    setStatus('Timed out');
+                    setOutput('The server took too long to respond. Please try again.');
+
                 }
             } catch (error) {
                 console.error('Polling error', error);
                 clearInterval(interval);
                 setIsPolling(false);
+                setStatus('Server Error');
             }
         }, 1000); 
     };
